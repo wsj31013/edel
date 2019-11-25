@@ -18,3 +18,7 @@ unknown:
   name: Unknown
   avatar:
   url:
+cobain:
+  name: cobain
+  avatar: "assets/img/avatars/cobain_avatar.jpeg"
+  url: "https://github.com/wsj31013"

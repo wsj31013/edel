@@ -6,9 +6,11 @@ feature-img: "assets/img/pexels/circuit.jpeg"
 tags: [About, Archive]
 ---
 
-Type on Strap is based on Type Theme, a free and open-source theme for [Jekyll](http://jekyllrb.com/), licensed under the MIT License.
+DevOps Engineer / Cloud Architect 로서 일하고 있습니다.  Python, AWS, ElasticSearch를 좋아 합니다.
 
-Head over to the [theme's documentation](https://github.io/sylhare/Type-on-Strap) for much more information about Type on Strap or to install this theme on your own Jekyll site.
+Agile 기반의 협력과 피드백 이라는 모토 아래 소프트웨어 엔지니어로서 지속적인 성장을 꿈꿉니다.
 
-This file is an example of a page in Jekyll, that automatically shows up in the header navigation, you can delete or modify this file freely.
- 
+최소한 입발자, 약장수 라는 소리는 듣지 않기 위해 노력합니다.
+
+페이스북 [facebook link](https://www.facebook.com/woo.cobain)
+

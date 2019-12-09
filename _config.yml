@@ -12,7 +12,7 @@ avatar: assets/img/cobain_cat.jpeg
 favicon: assets/favicon.ico                             # Icon displayed in the tab
 
 # Header and footer text
-header_text: "새로 만드는 중"                           # Change Blog header text
+header_text: " "                           # Change Blog header text
 header_feature_image: assets/img/pexels/notebook-1280538_1920.jpg
 footer_text: >
   Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>

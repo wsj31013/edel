@@ -49,9 +49,19 @@ Fluentd 문서(https://docs.fluentd.org/parser/multiline) 에는 자바, 레일�
 
 <match *.**>
   @type forward
-  retry_limit 5
+  <buffer>
+    @type file
+    path /var/log/td-agent/buffer/logback/logback.buffer
+    chunk_limit_size 1m
+    total_limit_size 1GB
+    flush_interval 5s
+    retry_max_times 5
+    retry_max_interval 10s
+    flush_at_shutdown true
+    overflow_action throw_exception
+  </buffer>
   <server>
-    host Aggregator Fargate ELB
+    host "#{ENV['FARGATE_ENDPOINT']}"
     port 24224
   </server>
 </match>
@@ -69,6 +79,14 @@ multiline을 parser로 사용할때는 format_firstline, formatN 지시자를 �
 아 그리고 정규표현식이 생각보다 컴퓨팅 리소스를 잡아먹을수 있으니 Client Fluentd(어플리케이션 노드)에서 파싱 처리 할지
 Aggregator Fluentd에서 처리 할지는 성능 테스트를 해보고 진행 해야 한다.
 Fluentd 로그 집계 때문에 어플리케이션에 지연이 발생하면 안되니까.
+
+match 섹션이 예전 포스팅한 것과 다르게 약간 수정 되었는데 "#{ENV['FARGATE_ENDPOINT']}" 이부분은 Fluent는 환경변수로 설정을 지정할 수 있고
+이 환경 변수를 '/etc/sysconfig/td-agent' 안에 선언하면 된다.
+저걸 한 이유가 dev/prod 마다 Fargate endpoint url이 달라지는데 소스가 다르면 안되니까 dev/prod에 따라 달라지는 값들은
+AWS Secret Manager에 값을 저장해 놓고 Fluent가 배포될때 Secret Manager에 있는 값을 가져오게 
+파이썬 함수를 하나 개발했다. 이 파이썬 코드랑 Secret Manager에서 값을 가져오는 것은 다음 Fargate Fluent 포스팅에 자세하게 다룰 예정이다.
+Secret Manager 말고도 파라미터 스토어에 저장 해놓고 가져오는 방법도 있으니 참고 하길 바란다.
+
 ```
 
 

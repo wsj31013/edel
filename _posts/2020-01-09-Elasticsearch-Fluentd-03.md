@@ -65,6 +65,7 @@ Sleuth가 적용된 로그 패턴은 아래와 같았으며 Grok Pattern으로 �
     @type multiline_grok
     grok_pattern \[%{TIMESTAMP_ISO8601:api-logging-time}\]\s+%{LOGLEVEL:level}\s+\[%{DATA:service},%{DATA:trace},%{DATA:span},%{DATA:exportable}\]\s+%{DATA:pid}\s+---\s+\[\s*%{DATA:thread}\]\s+%{DATA:class}\s+:\s+%{GREEDYDATA:message}
     multiline_start_regexp /\d{4}-\d{1,2}-\d{1,2}/
+    time_key api-logging-time
   </parse>
 </source>
 
@@ -85,9 +86,19 @@ Sleuth가 적용된 로그 패턴은 아래와 같았으며 Grok Pattern으로 �
 
 <match *.**>
   @type forward
-  retry_limit 5
+  <buffer>
+    @type file
+    path /var/log/td-agent/buffer/sleuth/sleuth.buffer
+    chunk_limit_size 1m
+    total_limit_size 1GB
+    flush_interval 5s
+    retry_max_times 5
+    retry_max_interval 10s
+    flush_at_shutdown true
+    overflow_action throw_exception
+  </buffer>
   <server>
-    host Aggregator Fargate ELB
+    host "#{ENV['FARGATE_ENDPOINT']}"
     port 24224
   </server>
 </match>

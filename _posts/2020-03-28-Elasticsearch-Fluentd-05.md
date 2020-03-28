@@ -10,7 +10,7 @@ excerpt_separator: <!--more-->
 <!--more-->
 
 #### 로그 수집, 분석 플랫폼 구축과 관련된 다섯번째 포스팅이고 이걸로 끝내려고 한다.
-#### 이 포스팅에선 Aggregator Fluent Docker 빌드, ECS Fargate 배포, Secret Manager를 통힌 환경변수 삽입 등에 대해 다룬다.
+#### 이 포스팅에선 Aggregator Fluent Docker 빌드, ECS Fargate 배포, Secret Manager를 통한 환경변수 삽입 등에 대해 다룬다.
 
 
 #### 1. Fluent Docker 

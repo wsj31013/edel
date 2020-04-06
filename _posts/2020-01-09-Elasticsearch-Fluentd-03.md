@@ -12,7 +12,7 @@ excerpt_separator: <!--more-->
 ##### 로그 수집, 분석 플랫폼 구축과 관련된 세번째 포스팅 이며, 이전 단계에서 ElasticSearch를 프로비저닝 하였고 
 ##### 이번 포스팅 에선 Index Templates, Mapping 그리고 이 아키텍처의 핵심인 Fluentd를 다룹니다.
 
-```yml
+```xml
 인덱스는 RDBMS의 DB랑 비슷하고, Mapping은 Schema와 비슷하다. 똑같진 않지만 처음엔 이렇게 비교하는게 Elasticsearch 입문자에겐 편한 것 같다.
 대략적인 순서는 이렇다.
 1. Dynamic Mapping을 이용해 로그 데이터를 Elasticsearc에 보내본다.
@@ -105,7 +105,7 @@ Sleuth가 적용된 로그 패턴은 아래와 같았으며 Grok Pattern으로 �
 ```
 
 
-```yml
+```xml
 Fluentd는 Input, Parse, Filter, Buffer, Output, Formatter 등으로 나눠지며
 데이터를 입력받는 Input, 정제 역할의 Parse, Filter, 버퍼와 큐잉 역할을 하는 Buffer, 데이터를 저장소로 보내는 Output 정도가 되겠다.
 Parse나 Filter는 필수는 아니고 개인의 필요에 따라 설정 하면 된다.
@@ -168,13 +168,13 @@ Logstash에 의해 이벤트가 처리된 시간임을 확인 할수 있으며
 물론 2가지 모두 테스트 해봤고 있거나 없거나 아직까진 문제가 되는 부분이 없다. 얘기가 길어졌는데 다음 섹션으로 넘어가자.
 ```
 
-```yml
+```xml
 세번째 filter 섹션은 api-logging-time이라는 Key에 Timezone을 추가한 섹션이다. Grok 패턴으로 파싱한 이후에 stdout 지시자로
 데이터 형태를 확인하고 Aggregator나 Elasticsearch로 전달 하는 과정을 거쳤었는데 그때 타임존이 없다는걸 처음엔 몰랐다.
 키바나에서 데이터를 조회하다 보니 나중에 알게되서 추가한 섹션이다.
 ```
 
-```yml
+```xml
 마지막 match 섹션이 output 부분인데 Aggregator Fluentd로 보내는 설정이다. 여기에서 버퍼 설정을 줄 수 있는데
 내가 Fluentd를 사용하면서 정말 잘 개발된 아키텍처구나 라고 느꼈던게 이 버퍼 부분 이었다.
 

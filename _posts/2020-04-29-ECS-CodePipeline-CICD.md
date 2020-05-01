@@ -167,7 +167,7 @@ Deploy 스테이지 작성은 잠시 미루고 건너뛰기를 클릭한다.
 ![my images]({{"/assets/img/thumbnails/codepipeline-ecs/20.build-complete01.png" | absolute_url}})
 
 ```xml
-소스 스테이지에서 생성된 2개의 아티팩트를 지정하면 하고 변경사항을 릴리즈 해보면 정상으로 빌드까지 성공할 것이다.
+소스 스테이지에서 생성된 2개의 아티팩트를 지정하고 변경사항을 릴리즈 해보면 정상으로 빌드까지 성공할 것이다.
 세부 정보를 클릭해서 빌드 실행(buildspec.yml) 로그를 확인해보고 아티팩트가 저장되는 S3에서 다운로드 받아
 배포에 필요한 imagedefinitions.json 이 정상적으로 문법에 맞게 생성되었는지 확인 해 봐야 한다.
 ```

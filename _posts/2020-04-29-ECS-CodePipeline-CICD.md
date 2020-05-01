@@ -71,6 +71,127 @@ Source(저장소) 이게 깃헙이나 코드커밋이 아닌 ECR 이기 때문�
 
 
 ### CodePipeline 파이프라인 생성
-![my images]({{"/assets/img/thumbnails/capacity-provider/07.cas.png" | absolute_url}})
+#### 1. 서비스 역할 및 아티팩트 S3 설정
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/02.pipeline.png" | absolute_url}})
+```xml
+파이프라인 이름을 지정하면서 새 서비스 역할을 생성하도록 한다. 
+S3는 파이프라인의 각 스테이지에서 생긴 아티팩트들을 저장하는 버켓이므로 기본으로 해도 되고 본인이 원하는 지정위치를 해도 된다.
+그냥 기본 위치 설정 하고 넘어가면 된다.
+```
+#### 2. 소스 스테이지 추가
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/03.source.png" | absolute_url}})
+```xml
+위에서도 얘기 했지만 
+소스 -> 빌드 -> 배포 이 3가지 단계중 소스 단계이며, ECR의 푸시 되어 있는 이미지를 선택한다.
+```
+#### 3. 빌드 스테이지 추가(1)
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/04.build.png" | absolute_url}})
+```xml
+빌드는 CodeBuild를 선택하고 프로젝트 생성을 누르면 CodeBuild 프로젝트 생성 팝업창이 뜬다.
+```
+
+#### 3. 빌드 스테이지 추가(2)
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/05.build.png" | absolute_url}})
+```xml
+빌드 프로젝트의 이름을 작성하고
+```
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/06.build.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/07.build.png" | absolute_url}})
+```xml
+코드빌드를 실행할 이미지와 런타임을 지정할 수 있는데 나는 위 사진 처럼 지정했고 이것은 도큐먼트에 더 자세하게 나와 있다.
+즉 아래에서 buildspec.yml에 작성된 코드들이 실행될 서버 이미지와 런타임을 설정한다고 보면 된다.
+```
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/08.build.png" | absolute_url}})
+```xml
+buildspec.yml 전체 코드
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+  build:
+    commands:
+      - YOUR_REPOSITORY1_URI=$(cat imageDetail.json | python -c "import sys, json; print(json.load(sys.stdin)['ImageURI'].split('@')[0])")
+      - YOUR_IMAGE1_TAG=$(cat imageDetail.json | python -c "import sys, json; print(json.load(sys.stdin)['ImageTags'][0])")
+      - echo $YOUR_REPOSITORY1_URI:$YOUR_IMAGE1_TAG
+      - cd $CODEBUILD_SRC_DIR_SourceArtifactOcr
+      - YOUR_REPOSITORY2_URI=$(cat imageDetail.json | python -c "import sys, json; print(json.load(sys.stdin)['ImageURI'].split('@')[0])")
+      - YOUR_IMAGE2_TAG=$(cat imageDetail.json | python -c "import sys, json; print(json.load(sys.stdin)['ImageTags'][0])")
+      - echo $YOUR_REPOSITORY2_URI:$YOUR_IMAGE2_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Writing image definitions file...
+      - printf '[{"name":"your_container_name1","imageUri":"%s"},{"name":"your_container_name2","imageUri":"%s"}]' $YOUR_REPOSITORY1_URI:$YOUR_IMAGE1_TAG $YOUR_REPOSITORY2_URI:$YOUR_IMAGE2_TAG > $CODEBUILD_SRC_DIR/imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json
+```
+
+```xml
+자 이제 위 코드를 설명 하겠다.
+이미 컨테이너 이미지가 빌드 된 상태인데 빌드 스테이지를 두고 위의 buildspec.yml을 작성한 이유는 
+소스가 깃헙이나 코드커밋이 아닌 ECR 이기 때문이다. 소스가 ECR 일 경우 소스 아티팩트가 imageDetail.json으로 생성되는데
+배포를 ECS 표준 배포를 사용한다면 imagedefinitions.json을 배포의 입력으로 사용해야 한다.
+
+즉 빌드 스테이지 에서는 imageDetail.json 아티팩트를 배포에 필요한 imagedefinitions.json 으로 변환하는 작업을 해주는 것이다.
+그리고 위의 코드는 2개의 컨테이너를 1개의 ECS 인스턴스에 같이 배포 하고자 위처럼 2개의 이미지가 정의 된다.
+1개의 컨테이너 이미지만 배포하는 경우라면 1개만 작성하면 된다. 
+```
+
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/09.build.png" | absolute_url}})
+```xml
+CodeBuild에서 프로젝트 생성을 마치고 나면 다시 CodePipeline으로 돌아와 다음으로 넘어간다.
+```
+
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/10.deploy-skip.png" | absolute_url}})
+```xml
+Deploy 스테이지 작성은 잠시 미루고 건너뛰기를 클릭한다.
+여기까지 다 되었다면 소스 스테이지에선 1개의 컨테이너 이미지만 소스아티팩트가 생겼고, 빌드에선 2개의 컨테이너 이미지를 buildspec.yml에 작성하였으므로
+빌드가 실패하게 된다. 의도한 것이므로 수정을 해주면 된다!
+만약 1개의 소스에서 배포 파이프라인을 작성하는것이라면 1개씩만 하면 된다.
+```
+
+#### 4. 소스 스테이지 작업 추가
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/14.edit-source02.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/15.edit-source03.png" | absolute_url}})
+
+```xml
+2개의 컨테이너 이미지에서 소스 아티팩트가 생성되야 하므로 작업을 추가 한다.
+작업 이름과 아티팩트 이름을 다르게 설정 해야 한다.
+```
+
+#### 5. 빌드 스테이지 수정
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/17.edit-build02.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/19.release.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/20.build-complete01.png" | absolute_url}})
+
+```xml
+소스 스테이지에서 생성된 2개의 아티팩트를 지정하면 하고 변경사항을 릴리즈 해보면 정상으로 빌드까지 성공할 것이다.
+세부 정보를 클릭해서 빌드 실행(buildspec.yml) 로그를 확인해보고 아티팩트가 저장되는 S3에서 다운로드 받아
+배포에 필요한 imagedefinitions.json 이 정상적으로 문법에 맞게 생성되었는지 확인 해 봐야 한다.
+```
+
+#### 6. 배포 스테이지 생성
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/23.deploy-add01.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/24.deploy-add02.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/25.deploy-add03.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/26.deploy-add04.png" | absolute_url}})
+```xml
+입력 아티팩트를 빌드스테이지에서 생성되는 빌드 아티팩트를 지정하고 배포 타겟 ECS를 지정한다.
+이미지 정의 파일을 빌드 아티팩트에서 생성된 imagedefinitions.json 으로 설정 한다.
+배포 스테이지까지 생성하고 나서 변경 사항을 릴리즈 하면 ECS로 배포 되는데 아래처럼 자동으로 Tasks Definition이 +1 된다.
+```
+
+#### 6. ECS 배포 확인
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/27.ecs-tasks-definition.png" | absolute_url}})
+![my images]({{"/assets/img/thumbnails/codepipeline-ecs/28.ecs-service-deploy.png" | absolute_url}})
+
+
+
+
+#### 참고한 문서
+`codepipeline` : [AWS Document](https://docs.aws.amazon.com/ko_kr/codepipeline/latest/userguide/file-reference.html#pipelines-create-image-definitions)
+
 
 

@@ -188,7 +188,12 @@ Deploy 스테이지 작성은 잠시 미루고 건너뛰기를 클릭한다.
 ![my images]({{"/assets/img/thumbnails/codepipeline-ecs/28.ecs-service-deploy.png" | absolute_url}})
 
 
-
+```xml
+ECR을 소스로 두고 변경된 이미지가 푸시 되면 코드빌드, 코드파이프라인을 이용해 CI/CD 파이프라인을 작성 해봤다.
+소스가 깃헙, 코드커밋과 같은 레포지토리가 아니라서 조금은 평범하지 않은 파이프라인인데 막상 작성 해보니 
+buildspec.yml을 이해하는데 조금 시간이 걸렸던 것을 빼면 크게 어려움 없이 짤 수 있었다.
+나같은 경우 그냥 어차피 코드를 파이썬 외에는 몰라서 파이썬 설치하고 한건데 다른 런타임을 설치해서 작성 해도 가능 하고 문서도 잘 되어 있다.
+```
 
 #### 참고한 문서
 `codepipeline` : [AWS Document](https://docs.aws.amazon.com/ko_kr/codepipeline/latest/userguide/file-reference.html#pipelines-create-image-definitions)

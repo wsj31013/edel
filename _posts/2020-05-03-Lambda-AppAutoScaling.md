@@ -120,3 +120,5 @@ Working Time에만 동작하는 람다 함수가 완성 된다.
 `API ApplicationAutoScaling` : [AWS API Documents](https://docs.aws.amazon.com/autoscaling/application/APIReference/API_RegisterScalableTarget.html)
 
 `Boto3 ApplicationAutoScaling` : [Boto3 API Documents](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/application-autoscaling.html#ApplicationAutoScaling.Client.register_scalable_target)
+
+`PassRole` : [Add PassRole Documents](https://docs.aws.amazon.com/ko_kr/iot/latest/developerguide/pass-role.html)

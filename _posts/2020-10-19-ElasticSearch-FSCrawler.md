@@ -21,7 +21,7 @@ excerpt_separator: <!--more-->
 본인의 깃헙 레포지토리에 코드를 공개해 놨는데 이 레포지토리의 Main 브랜치를 Clone 받은 이후에 
 사용하는 방법에 대해 포스팅 하겠다.
 
-엘라스틱서치야 뭐 설명할 필요가 없을 정도로 이젠 거의 표준이라고 말해도 과언이 아닐 정도로 많은 기업들이 활용하고 있다.
+엘라스틱서치야 뭐 이젠 거의 표준이라고 말해도 과언이 아닐 정도로 많은 기업들이 활용하고 있다.
 FSCrawler는 pdf, word, pptx, cvs와 같은 문서들을 주기적으로 인덱싱 해주는 오픈소스 인데
 나도 모든 옵션들을 사용한 것도 아니고 디테일하게 아는 것은 아니라 아주 간단하게만 사용법에 대해 다룰 것이고
 Nori는 엘라스틱 6.6부터 엘라스틱에서 공식적으로 개발하고 있는 한글 형태소 분석기 이다.
@@ -36,26 +36,26 @@ Nori는 엘라스틱 6.6부터 엘라스틱에서 공식적으로 개발하고 �
 
 ### 2. Install & Configure & Build
 ```xml
-// 레포지토리에서 소스코드를 내려 받습니다.
+레포지토리에서 소스코드를 내려 받습니다.
 # git clone https://github.com/wsj31013/searchCrawler.git
 # cd searchCrawler
 
-// 도큐먼트가 저장될 디렉토리를 생성 한다. data 디렉토리는 gitignore에 선언되어 있습니다.
+도큐먼트가 저장될 디렉토리를 생성 한다. data 디렉토리는 gitignore에 선언되어 있습니다.
 # mkdir data
 
-// 웹으로 사용될 Nginx 컨테이너를 빌드 합니다. 
-// 화면 수정이 필요한 사람들은 추가로 수정 후에 빌드 하면 됩니다. 본인은 퍼블리싱은 잘 몰라서
-// 아래 참고한 블로그에서 가져온 코드를 부트스트랩 CDN을 사용하고 ajax로 데이터를 가져오는 json 필드를 수정 하였다.
+웹으로 사용될 Nginx 컨테이너를 빌드 합니다. 
+화면 수정이 필요한 사람들은 추가로 수정 후에 빌드 하면 됩니다. 본인은 퍼블리싱은 잘 몰라서
+아래 참고한 블로그에서 가져온 코드를 부트스트랩 CDN을 사용하고 ajax로 데이터를 가져오는 json 필드를 수정 하였다.
 # cd web
 # docker build -t custom-nginx:latest .
 # docker images | grep nginx
 custom-nginx                                                                   latest              f96eb3a02bf8        3 days ago          157MB
 nginx                                                                          latest              9beeba249f3e        5 months ago        127MB
 
-//다시 프로젝트 홈으로 이동 합니다.
+다시 프로젝트 홈으로 이동 합니다.
 # cd ..
 
-// 도커 컴포즈 파일을 확인 합니다.
+도커 컴포즈 파일을 확인 합니다.
 # ll
 total 24
 -rw-r--r--  1 wooseongjin  staff   2.1K 10 20 13:40 README.md
@@ -73,7 +73,7 @@ single-search-compose.yml 은 엘라스틱서치를 싱글 노드 구성하는 �
 엘라스틱서치 헬스체크를 기준으로 나머지 컨테이너가 기동되게 depends_on 파라미터를 사용 하였습니다.
 FScrawler가 엘라스틱서치가 기동되지 않은 상태에선 Run 되지 않으므로 이렇게 구성 하였습니다.
 
-// FSCrawler 설정과 관련된 config 디렉토리를 살펴 봅니다.
+FSCrawler 설정과 관련된 config 디렉토리를 살펴 봅니다.
 # tree config
 config
 ├── _default
@@ -102,15 +102,15 @@ FSCrawler 설정과 nori 매핑 설정도 끝냈으니 이제 컴포즈를 실�
 
 ### 3. Run 
 ```xml
-// FSCrawler가 처음 실행되면 엘라스틱서치에 위에서 설정된 job_name에 맞게 인덱스를 생성하게 되고
-// 그 인덱스에 저장된 도큐먼트가 인덱싱 됩니다.
+FSCrawler가 처음 실행되면 엘라스틱서치에 위에서 설정된 job_name에 맞게 인덱스를 생성하게 되고
+그 인덱스에 저장된 도큐먼트가 인덱싱 됩니다.
 # docker-compose -f single-search-compose.yml up -d
 Starting elasticsearch ... done
 Starting searchcrawler_web_1 ... done
 Starting kibana              ... done
 Recreating fscrawler         ... done
 
-// 어플리케이션의 상태를 확인해 봅니다.
+어플리케이션의 상태를 확인해 봅니다.
 # docker-compose -f single-search-compose.yml ps
        Name                      Command                  State                    Ports
 ------------------------------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ searchcrawler_web_1   nginx -g daemon off;             Up             0.0.0.0:80
 
 
 
-// 잘 된거 같애요. 이제 엘라스틱서치의 인덱스를 살펴 봐야 합니다.
+잘 된거 같네요. 이제 엘라스틱서치의 인덱스를 살펴 봐야 합니다.
 # curl -X GET "localhost:9200/_cat/indices
 # curl 'http://localhost:9200/cobain/_mapping'
 
@@ -164,7 +164,7 @@ data/ 디렉토리에 검색에 사용할 문서들을 몇개 집어 넣습니�
 # curl 'http://localhost:9200/cobain/_count'
 {"count":0,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}
 
-// 이 튜토리얼에서는 테스트에 사용될 문서 3개를 넣었습니다. FSCrawler 로그를 보면서 인덱싱이 되는지 기다립니다.
+이 튜토리얼에서는 테스트에 사용될 문서 3개를 넣었습니다. FSCrawler 로그를 보면서 인덱싱이 되는지 기다립니다.
 # docker logs -f 35447150c95d
 05:29:30,759 INFO  [f.p.e.c.f.c.BootstrapChecks] Memory [Free/Total=Percent]: HEAP [113.6mb/1.7gb=6.42%], RAM [3.2gb/7.7gb=41.37%], Swap [1023.9mb/1023.9mb=100.0%].
 05:29:31,858 INFO  [f.p.e.c.f.c.v.ElasticsearchClientV7] Elasticsearch Client for version 7.x connected to a node running version 7.9.2
@@ -197,6 +197,11 @@ Mac에 설치된 Docker 엔진 버전도 올렸더니 조금 보기 편한 UI가
 ```xml
 이 UI에서 vscode도 열수 있고 바로 컨테이너 쉘로 진입할 수 있는 기능들도 제공 합니다. 
 
+간혹 엘라스틱서치나 FSCrawler 컨테이너가 갑자기 죽어버리는 증상들을 몇번 겪었고 로그에 메모리 관련 에러가 남지 않아
+디버깅 하는데 조금 오래 걸렸는데 이건 Mac에 설치된 Docker의 메모리 리미트값을 2GB로 설정해서
+생긴 문제로서 이 값들을 본인의 메모리에 맞게 설정 하면 된다.
+
+이걸로 검색엔진 구축 포스팅은 끝
 ```
 
 

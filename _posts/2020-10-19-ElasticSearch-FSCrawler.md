@@ -94,7 +94,7 @@ default/ 디렉토리는 FSCrawler에 의해 생성되는 매핑을 정의하는
 cobain/ 디렉토리는 FSCrawler에서 사용할 job_name을 정의하는 디렉토리 이며
 _settings.yaml에서 FSCrawler의 옵션들을 지정합니다. 정말 많은 옵션들이 있고 이 크롤러가 엘라스틱서치에 데이터들을 주기적으로 
 업데이트를 해야 하는 설정 값들 정도로 보면 될거 같습니다.
-또한 이 job_name 디렉토리에 FSCrawler가 기동되면 _status.json 이라는 자동으로 생성되며 이는 gitignore에 정의되어 있습니다.
+또한 이 job_name 디렉토리에 FSCrawler가 기동되면 _status.json 이라는 파일이 자동으로 생성되며 이는 gitignore에 정의되어 있습니다.
 아마 크롤러가 저장된 문서를 주기적으로 업데이트 하는 파라미터가 update_rate 이거 일겁니다. 디폴트가 10분 일건데 저는 5분으로 지정했습니다.
 
 FSCrawler 설정과 nori 매핑 설정도 끝냈으니 이제 컴포즈를 실행해 봅니다.

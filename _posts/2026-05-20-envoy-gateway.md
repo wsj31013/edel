@@ -11,6 +11,9 @@ excerpt_separator: <!--more-->
 
 #### GatewayAPI 역할 분리와 트래픽 흐름
 ![my images]({{"/assets/img/thumbnails/envoy-gateway/gatewayapi.png" | absolute_url}})
+
+<br><br>
+
 ![my images]({{"/assets/img/thumbnails/envoy-gateway/flow.png" | absolute_url}})
 
 #### Envoy Gateway Architecture

@@ -16,6 +16,81 @@ excerpt_separator: <!--more-->
 
 ![my images]({{"/assets/img/thumbnails/envoy-gateway/flow.png" | absolute_url}})
 
+<br><br>
+
+#### Gateway API를 지원하는 오픈소스 주요 구현체
+- Envoy Gateway
+- Nginx Gateway Fabric
+- Cilium → Envoy Proxy
+- Traefik
+- Kong Gateway
+- Tyk
+- Istio → Envoy Proxy
+- Kgateway → Envoy Proxy
+- AWS LoadBalancer Controller → v3.0 이상이어야 한다. v2.x 권고 되지 않음
+- Contour → Envoy Proxy
+
+<br><br>
+
+#### Ingress API, Gateway API 비교
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Ingress</th>
+      <th>Gateway</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>리소스</td>
+      <td>
+        IngressController<br>
+        IngressClass<br>
+        Ingress
+      </td>
+      <td>
+        Gateway Control Plane<br>
+        GatewayClass<br>
+        Gateway,<br>
+        HTTPRoutes
+      </td>
+    </tr>
+    <tr>
+      <td>역할 분리</td>
+      <td>가능</td>
+      <td>인프라 제공자, 클러스터 운영자, 개발자 분리</td>
+    </tr>
+    <tr>
+      <td>프로토콜</td>
+      <td>HTTP/HTTPS</td>
+      <td>HTTP/HTTPS, TCP, UDP, gRPC, TLS</td>
+    </tr>
+    <tr>
+      <td>라우팅</td>
+      <td>호스트, 경로 기반</td>
+      <td>헤더, 쿼리스트링, 메서드 매칭</td>
+    </tr>
+    <tr>
+      <td>트래픽 분할</td>
+      <td>지원</td>
+      <td>지원</td>
+    </tr>
+    <tr>
+      <td>TLS</td>
+      <td>Termination</td>
+      <td>Termination, Passthrough, BackendTLSPolicy</td>
+    </tr>
+    <tr>
+      <td>교차 네임스페이스</td>
+      <td>미지원</td>
+      <td>지원, ReferenceGrant</td>
+    </tr>
+  </tbody>
+</table>
+
+
 #### Envoy Gateway Architecture
 ![my images]({{"/assets/img/thumbnails/envoy-gateway/envoy-gateway-architecture.png" | absolute_url}})
 

@@ -44,13 +44,15 @@ excerpt_separator: <!--more-->
   </tbody>
 </table>
 
-gatewayClass가 envoyProxy의 설정을 참조 하기 때문에
-gatewayClass를 상속 받아 gateway에서 배포하는 envoyProxy Deployments는 당연하게도 gatewayClass, envoyProxy의 설정을 모두 상속 받게 된다.
-즉, 1개의 gatewayClass를 상속받아 배포 되는 gateway는 모두 동일한 설정을 갖게 된다는 의미이고
-다른 설정이 필요하다면 gatewayClass, envoyProxy를 모두 분리 하는 방법을 쓰거나
-Gateway의 infrastructure.parametersRef로 Gateway마다 다른 EnvoyProxy를 줄 수 있기 때문에 GatewayClass를 분리 하지 않고도 배포 할 수도 있다.
-ELB(NLB) 분리의 기준은 Gateway Custom Resources 이다.
-Gateway의 교차 네임스페이스를 지원 하려면 referenceGrant Custom Resources를 배포 해야 한다.
+`GatewayClass`가 `EnvoyProxy`의 설정을 참조하기 때문에,
+`GatewayClass`를 상속받아 `Gateway`에서 배포하는 Envoy Proxy Deployment는 `GatewayClass`와 `EnvoyProxy` 설정을 모두 따른다.
+
+즉, 동일한 `GatewayClass`를 상속받아 배포되는 `Gateway`는 모두 동일한 설정을 갖는다.
+다른 설정이 필요하다면 `GatewayClass`와 `EnvoyProxy`를 모두 분리하는 방법을 쓰거나,
+`Gateway.spec.infrastructure.parametersRef`로 Gateway마다 다른 `EnvoyProxy`를 지정할 수 있어 `GatewayClass`를 분리하지 않고도 배포할 수 있다.
+
+로드밸런서(NLB) 분리의 기준은 `Gateway` Custom Resource이다.
+`Gateway`의 교차 네임스페이스를 지원하려면 `ReferenceGrant` Custom Resource를 배포해야 한다.
 
 
 #### 설계 고려 사항
@@ -78,6 +80,9 @@ RateLimit 기능을 사용하려면 Redis가 필요하다.
 
 
 #### Ref.
-_Gateway API Introduction : [Gateway API](https://gateway-api.sigs.k8s.io/docs/introduction/)
-_Kubernetes Gateway : [Kubernetes Gateway](https://kubernetes.io/ko/docs/concepts/services-networking/gateway/)
-_Envoy Gateway Extension API : [Envoy Gateway API Reference](https://gateway.envoyproxy.io/docs/api/extension_types/)
+
+_Gateway API Introduction : [Gateway API](https://gateway-api.sigs.k8s.io/docs/introduction/)_
+
+_Kubernetes Gateway : [Kubernetes Gateway](https://kubernetes.io/ko/docs/concepts/services-networking/gateway/)_
+
+_Envoy Gateway Extension API : [Envoy Gateway API Reference](https://gateway.envoyproxy.io/docs/api/extension_types/)_

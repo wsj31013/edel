@@ -10,7 +10,6 @@ excerpt_separator: <!--more-->
 
 Harbor 리텐션 폴리시를 Terraform으로 관리하다가, `dynamic "rule"` 블록을 조건부로 넣을 때 `tonumber`를 처음 쓰게 되어
 자주 사용하는 함수를 정리한다.   
-변수는 YAML/JSON에서 오기 때문에 **문자열(string) `"3"`** 과 **숫자(integer) `3`** 이 섞여 들어오고, `> 0` 같은 비교를 하려면 타입을 맞춰야 한다.  
 
 ```hcl
 dynamic "rule" {
@@ -49,7 +48,7 @@ title("hello world")  # "Hello World"
 
 #### `trim` / `trimspace` / `trimprefix` / `trimsuffix`
 
-앞뒤 공백·접두/접미사 제거. 사용자 입력·YAML 값 정제에 필수다.
+앞뒤 공백·접두/접미사 제거. 사용자 입력·YAML 값 정제에 사용
 
 ```hcl
 trimspace("  nginx  ")           # "nginx"
@@ -61,7 +60,7 @@ trimsuffix("app.tar.gz", ".gz")  # "app.tar"
 
 #### `split` / `join`
 
-문자열 ↔ 리스트 변환. CSV 형태 변수, ARN·경로 파싱에 자주 쓴다.
+문자열 ↔ 리스트 변환. CSV 형태 변수, ARN·경로 파싱에 자주 사용
 
 ```hcl
 split(",", "a,b,c")           # ["a", "b", "c"]
@@ -70,7 +69,7 @@ join("-", ["web", "01", "kr"]) # "web-01-kr"
 
 #### `format` / `formatlist`
 
-`printf` 스타일 포맷. `formatlist`는 리스트 각 원소에 동일 포맷을 적용한다.
+`printf` 스타일 포맷. `formatlist`는 리스트 각 원소에 동일 포맷을 적용
 
 ```hcl
 format("sg-%s", var.env)                    # "sg-prod"
@@ -79,7 +78,7 @@ formatlist("subnet-%s", ["a", "b"])         # ["subnet-a", "subnet-b"]
 
 #### `replace` / `regex` / `regexall` / `regexreplace`
 
-단순 치환과 정규식. 태그·이미지 경로 패턴을 다룰 때 `regex` 계열이 필요하다.
+단순 치환과 정규식. 태그·이미지 경로 패턴을 다룰 때 `regex` 계열이 필요
 
 ```hcl
 replace("1.2.3", ".", "-")                  # "1-2-3"
@@ -89,7 +88,7 @@ regexreplace("v1.2.3", "^v", "")            # "1.2.3"
 
 #### `startswith` / `endswith` / `strcontains`
 
-조건 분기 없이 불리언만 필요할 때 가독성이 좋다.
+조건 분기 없이 Boolean만 필요할 때 가독성이 좋다.
 
 ```hcl
 startswith("registry.io/myapp", "registry.io")  # true
@@ -132,7 +131,7 @@ parseint("42", 10)     # 42
 
 #### `tonumber`
 
-문자열 `"10"` → 숫자 `10`. 변환 실패 시 **plan/apply 단계에서 에러**가 난다.
+문자열 `"10"` → 숫자 `10`. 변환 실패 시 **plan/apply 단계에서 에러** 발생할수 있음
 
 ```hcl
 tonumber("3") > 0        # true
@@ -171,7 +170,7 @@ contains("hello", "ell")                     # true
 
 #### `count` (리스트 필터용)
 
-**리스트**에서 조건을 만족하는 원소 개수. `length`와 헷갈리기 쉬우니 이름을 기억할 것.
+**리스트**에서 조건을 만족하는 원소 개수. 보통 boolean feature flag 패턴으로 배포 할지 말지를 count 함수를 사용
 
 ```hcl
 count(["a", "bb", "ccc"], length) > 1   # 길이 1 초과인 문자열 개수 → 2

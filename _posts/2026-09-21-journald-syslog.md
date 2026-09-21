@@ -314,17 +314,7 @@ host /var/log/journal
 
 입력은 [systemd](https://docs.fluentbit.io/manual/data-pipeline/inputs/systemd), 출력은 [syslog](https://docs.fluentbit.io/manual/data-pipeline/outputs/syslog)다. RFC 3164/5424, UDP/TCP/TLS를 지원한다. 같은 일을 Fluentd로도 할 수 있다. journal은 `fluent-plugin-systemd`, 원격 syslog는 보통 `fluent-plugin-remote_syslog`다. 둘 다 기본 이미지에 없을 수 있고, 리소스도 Fluent Bit보다 크다. 노드 journal을 한곳으로 보내는 용도면 Fluent Bit가 맞다.
 
-파드가 journal을 읽으려면 이 정도가 필요하다.
-
-- `/var/log/journal` 마운트. AL2023은 persistent journal을 여기에 둔다
-- `/etc/machine-id` (저널 식별)
-- journal 파일은 `systemd-journal` 그룹 소유. `supplementalGroups`에 해당 GID를 넣거나, 권한을 넓힌다. GID가 AMI마다 다를 수 있다
-- journal cursor를 `hostPath`에 저장. 안 하면 파드 재시작 시 중복 또는 공백이 난다
-- `Read_From_Tail On` — 배포 직후 과거 저널을 쏟지 않음
-- 필터: `_SYSTEMD_UNIT=kubelet.service`, `containerd.service`부터. 전체 journal은 양이 크다
-- `Path`가 없는 디렉터리면 프로세스가 죽는다. 없는 `/run/log/journal`을 억지로 넣지 않는 편이 안전하다
-
-대략적인 설정은 아래와 같다.
+대략적인 설정 fluent-bit 설정은 아래와 같다.
 
 ```
 [INPUT]
@@ -349,13 +339,9 @@ host /var/log/journal
     Syslog_Message_Key    MESSAGE
 ```
 
-`Syslog_Message_Key`는 필수다. 없으면 빈 메시지가 나간다. 구형 서버면 `rfc3164`와 UDP로 맞춘다. syslog로 가는 순간 구조화 필드는 대부분 한 줄로 평탄화된다.
+`Syslog_Message_Key`는 필수이며 구형 서버면 `rfc3164`와 UDP로 맞춘다. syslog로 가는 순간 구조화 필드는 대부분 한 줄로 평탄화된다.
 
-이미지 버전도 함정이다. systemd 246 이후 journal 압축(zstd)을 구버전 Fluent Bit가 못 읽는다. 업스트림은 1.8.11에서 고쳤고, `aws-for-fluent-bit` 2.32.x대는 AL2023에서 systemd 입력이 실패하는 사례가 있다. ([aws-for-fluent-bit#831](https://github.com/aws/aws-for-fluent-bit/issues/831)) 3.0.0부터 베이스가 AL2023이고 Fluent Bit 4.x다. ([AWS for Fluent Bit 3.0.0](https://aws.amazon.com/about-aws/whats-new/2025/10/aws-fluent-bit-3-0-0-based-4-1-1/))
-
-설정 변경은 ConfigMap + 파드 롤링이면 된다. 노드 롤링이 없다. Autoscaling으로 노드가 늘어도 DaemonSet이 따라간다. MNG·Karpenter처럼 노드가 자주 바뀌는 구성에서는 이쪽이 운영 비용이 낮다.
-
-대가는 호스트 journal 접근이다. 보안 컨텍스트가 넓어지고, 수집기가 노드 OS 일부가 아니라 클러스터 워크로드가 된다.
+systemd 246 이후 journal 압축(zstd)을 구버전 Fluent Bit가 못 읽는다. 업스트림은 1.8.11에서 고쳤고, `aws-for-fluent-bit` 2.32.x대는 AL2023에서 systemd 입력이 실패하는 사례가 있다. ([aws-for-fluent-bit#831](https://github.com/aws/aws-for-fluent-bit/issues/831)) 3.0.0부터 베이스가 AL2023이고 Fluent Bit 4.x다. ([AWS for Fluent Bit 3.0.0](https://aws.amazon.com/about-aws/whats-new/2025/10/aws-fluent-bit-3-0-0-based-4-1-1/))
 
 ---
 
@@ -371,14 +357,8 @@ host /var/log/journal
 | 필터·변환 | rsyslog 룰 | 플러그인이 더 유연 |
 | 확대 | 노드 템플릿 복제 + 롤링 | 차트 값 복제 |
 
-둘 다 기술적으로 된다. 같은 저널을 양쪽에 넣으면 중복만 늘어난다. CloudWatch 에이전트 journald 수집을 같이 켜도 마찬가지다.
+현재 둘 다 기술적으로 가능은 한데 어쨋든 로그를 수집해야 한다면 1개만 하면 될 듯
 
-공통 선행은 수집기보다 먼저다.
 
-- 워커 → 중앙 syslog 네트워크와 보안 그룹
-- 서버가 UDP 514만 받는지, TCP/TLS인지
-- 수집 범위. kubelet/containerd부터 보고, 전체 journal은 나중에
-- 파드 로그 파이프라인과 역할을 나눈다. 파드 stdout은 `/var/log/pods`, 노드 유닛은 journal
-
-운영 관점에서는 EKS MNG + AL2023 + 노드 교체가 잦은 구성이라 Fluent Bit DS가 더 맞다. 노드 OS에 syslog 데몬이 있어야 한다는 기존 서버 표준을 그대로 가져가려면 rsyslog다.
+운영 관점에서는 EKS MNG + AL2023 + Karpenter 는 노드 교체가 잦은 구성이라 Fluent Bit 데몬셋이 더 적절
 

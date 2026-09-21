@@ -110,7 +110,7 @@ EKS 파드 로그는 예전처럼 `/var/log/pods`에 있는데, kubelet·contain
 
 syslogd는 전통 BSD syslog 데몬(`syslogd`), 그리고 그 프로토콜을 구현한 `rsyslog`·`syslog-ng`를 통틀어 부를 때가 많다. 메시지 포맷도 RFC 3164(BSD syslog)와 RFC 5424가 같이 쓰인다.
 
-Amazon Linux2와 Amazon Linux2023에서 실제로 갈린 것은 아래와 같다.
+Amazon Linux 2와 Amazon Linux 2023에서 실제로 갈린 것은 아래와 같다.
 
 | | AL2 | AL2023 |
 | --- | --- | --- |
@@ -186,7 +186,7 @@ journald가 하지 않는 일도 분명하다. **원격 UDP/TCP 514 같은 전�
 
 이미 journald가 로그를 모으고 있으니, 호환용 데몬과 텍스트 파일을 기본 이미지에서 빼자는 쪽에 가깝다. AL2023 릴리스 노트도 같은 이야기다. `rsyslog` 기본 미설치, syslog는 `systemd-journald` + `journalctl`. ([2022.0.20221101](https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes-2022.0.20221101.html))
 
-성능과 완전히 무관한 것은 아닌것 같다.
+성능과 완전히 무관한 것은 아닌 것 같다.
 
 이중 기록(journal + `/var/log/messages`)이 사라지면 디스크 I/O와 데몬 하나가 줄어든다. 바이너리 저널은 필드 인덱스가 있어서 `journalctl -u kubelet -p err`가 `grep /var/log/messages`보다 검색에 유리하다. 텍스트 파일용 logrotate도 필요 없다.
 
@@ -218,9 +218,9 @@ syslog 한 줄은 대략 시각, 호스트, 프로그램, 메시지다. journal�
 | 노드 시스템 | kubelet, containerd, sshd | **journal** (`kubelet.service`, `containerd.service`) | journal을 읽는 수집기가 따로 필요 |
 | 노드 위 시스템 파드 | kube-proxy, aws-node(VPC CNI) | 파드 로그 경로 | 애플리케이션 층과 같음 |
 
-컨트롤 플레인은과 파드 로그는 글 범위가 아니며 kubelet이 CRI 로그를 파일로 남긴다.
+컨트롤 플레인과 파드 로그는 이 글 범위가 아니다. 파드 로그는 kubelet이 CRI 로그로 파일에 남긴다.
 
-EKS-optimized AL2023 AMI는 `kubelet`과 `containerd`를 심고, AL2023에서 Docker runtime은 지원하지 않는다. ([EKS-optimized AMI](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html), [AL2 → AL2023](https://docs.aws.amazon.com/eks/latest/userguide/al2023.html)) 둘 다 systemd 유닛이라 로그는 journal이 로그를 저장한다.
+EKS-optimized AL2023 AMI는 `kubelet`과 `containerd`가 사전 설치되어 있고, AL2023에서 Docker runtime은 지원하지 않는다. ([EKS-optimized AMI](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html), [AL2 → AL2023](https://docs.aws.amazon.com/eks/latest/userguide/al2023.html)) 둘 다 systemd 유닛이라 journal이 로그를 저장한다.
 
 Fargate는 노드에 DaemonSet을 올리지 못하므로 journal을 읽을 대상 자체가 없다. 이 글은 EC2 워커(MNG, self-managed, Karpenter) 기준이다.
 
@@ -295,9 +295,10 @@ AL2023 MNG user data는 MIME multipart여야 한다. `application/node.eks.aws`(
 - user data를 바꾸면 Launch Template 버전 갱신
 - 패키지 설치가 실패해도 kubelet은 뜨게 할지, 부팅을 실패로 볼지 정책을 정해야 한다
 
-커스텀 AMI에 rsyslog를 설치패 빌드 해두면 부팅이 빠르고 `dnf` 의존이 없다. 대신 AMI 파이프라인, 보안 패치, 아키텍처별 빌드가 생긴다. 클러스터가 많으면 유지비가 커진다.
+커스텀 AMI에 rsyslog를 설치해 빌드해 두면 부팅이 빠르고 `dnf` 의존이 없다. 대신 AMI 파이프라인, 보안 패치, 아키텍처별 빌드가 생긴다. 클러스터가 많으면 유지비가 커진다.
 
 노드 OS에 syslog 데몬이 있어야 한다는 기존 서버 표준을 그대로 가져가려면 이 옵션이다.
+
 ---
 
 ### 옵션 2. Fluent Bit DaemonSet
@@ -314,7 +315,7 @@ host /var/log/journal
 
 입력은 [systemd](https://docs.fluentbit.io/manual/data-pipeline/inputs/systemd), 출력은 [syslog](https://docs.fluentbit.io/manual/data-pipeline/outputs/syslog)다. RFC 3164/5424, UDP/TCP/TLS를 지원한다. 같은 일을 Fluentd로도 할 수 있다. journal은 `fluent-plugin-systemd`, 원격 syslog는 보통 `fluent-plugin-remote_syslog`다. 둘 다 기본 이미지에 없을 수 있고, 리소스도 Fluent Bit보다 크다. 노드 journal을 한곳으로 보내는 용도면 Fluent Bit가 맞다.
 
-대략적인 설정 fluent-bit 설정은 아래와 같다.
+대략적인 Fluent Bit 설정은 아래와 같다.
 
 ```
 [INPUT]
@@ -357,8 +358,7 @@ systemd 246 이후 journal 압축(zstd)을 구버전 Fluent Bit가 못 읽는다
 | 필터·변환 | rsyslog 룰 | 플러그인이 더 유연 |
 | 확대 | 노드 템플릿 복제 + 롤링 | 차트 값 복제 |
 
-현재 둘 다 기술적으로 가능은 한데 어쨋든 로그를 수집해야 한다면 1개만 하면 될 듯
+현재 둘 다 기술적으로는 된다. 로그를 수집해야 한다면 하나만 하면 된다.
 
-
-운영 관점에서는 EKS MNG + AL2023 + Karpenter 는 노드 교체가 잦은 구성이라 Fluent Bit 데몬셋이 더 적절
+운영 관점에서는 EKS MNG + AL2023 + Karpenter처럼 노드 교체가 잦은 구성이라 Fluent Bit DaemonSet이 더 적절하다.
 
